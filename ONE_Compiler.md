@@ -2,6 +2,8 @@
 
 ## One compiler build 
 
+- 실행 환경 : Virtualbox로 ubuntu18.04
+
 ### 1. 필요 패키지 설치 
 
 - https://github.com/Samsung/ONE/blob/master/docs/howto/how-to-build-compiler.md
@@ -239,29 +241,25 @@ find_package(PythonLibs 3.8 QUIET)
         $ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 2
         ```
     
-        
-
-
 
 **configure 성공 !** 
 
-
-
 ### One build
 
+#### 오류
 
+- pip가 설치되지 않았다는 오류
 
-https://stackoverflow.com/questions/65359015/trying-to-update-python-3-9-giving-errors
+    - https://stackoverflow.com/questions/65359015/trying-to-update-python-3-9-giving-errors
 
+    - https://devlog.jwgo.kr/2020/02/29/broken-pip-error/
 
+    ```
+     sudo ln -Tfs python3.8 python3
+    ```
 
-https://devlog.jwgo.kr/2020/02/29/broken-pip-error/
-
-```
- sudo ln -Tfs python3.8 python3
-```
-
-https://github.com/Samsung/ONE/issues/8800
+- 패키지 추가 설치 
+    - https://github.com/Samsung/ONE/issues/8800
 
 
 
@@ -276,4 +274,12 @@ The following tests FAILED:
         109 - luci_pass_value_test (Failed)
 Errors while running CTest
 ```
+
+- 에러로그 
+
+    ```
+    The TensorFlow library was compiled to use AVX instructions, but these aren't available on your machine. 
+    ```
+
+- 현재 원인파악 결과, 낙현님께서 WSL에서는 테스트 모두 통과하나, Virtualbox로 만든 VM에서는 안되는걸 보아, CPU가 딸려서 그런 것 같음 .. Tensorflow를 돌릴 수 없는 환경이라 나옴 
 

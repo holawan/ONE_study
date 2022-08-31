@@ -63,13 +63,16 @@ https://code.visualstudio.com/docs/remote/ssh-tutorial
 
 #### 2-2. Virtual Machine 
 
-https://lts0606.tistory.com/m/222
+- ssh 접속 
 
-https://shanepark.tistory.com/195
+    - https://lts0606.tistory.com/m/222
 
-https://jihyewoo.tistory.com/74
+    - https://shanepark.tistory.com/195
 
-https://sh-safer.tistory.com/132
+    - https://jihyewoo.tistory.com/74
+
+- VirtualBox로 리눅스 (Ubuntu18.04 설치)
+    - https://sh-safer.tistory.com/132
 
 ### 4. ONE-vscode 확장 설치
 
@@ -89,3 +92,16 @@ https://sh-safer.tistory.com/132
     code --install-extension one-vscode-0.3.0.vsix
     ```
 
+####  ONE VS-code 오류 해결
+
+- 혜령님 글 참고 
+
+- one vscode 설치 (extension 창에서 `…` 버튼 클릭해 [vsix로 설치] 선택)
+
+    - vsix 파일을 Ubuntu에서 찾아 선택
+
+    ![제목 없음2.png](ONE_vscode.assets/제목 없음2.png)
+
+- 아래와 비슷한 오류가 뜨면서 뭔가 잘 안 된다면, [파일] - [폴더 열기]를 해서 /home/user명/.vscode-server/extensions 경로의 samsung.one-vscode-0.3.0을 선택해보기
+
+    ![KakaoTalk_20220830_155847055](ONE_vscode.assets/KakaoTalk_20220830_155847055.png)
