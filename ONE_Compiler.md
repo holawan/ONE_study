@@ -28,19 +28,19 @@
     $ sudo apt-get install libatlas-base-dev
     $ sudo apt-get install libboost-all-dev
     $ sudo apt-get install libgflags-dev 
-    $ sudo apt-get install libgoogle-glog-dev \
-    $ sudo apt-get install libgtest-dev \
-    $ sudo apt-get install libhdf5-dev \
-    $ sudo apt-get install libprotobuf-dev \
-    $ sudo apt-get install protobuf-compiler \
-    $ sudo apt-get install pylint \
-    $ sudo apt-get install python3 \
-    $ sudo apt-get install python3-pip \
-    $ sudo apt-get install python3-venv \
+    $ sudo apt-get install libgoogle-glog-dev
+    $ sudo apt-get install libgtest-dev
+    $ sudo apt-get install libhdf5-dev
+    $ sudo apt-get install libprotobuf-dev
+    $ sudo apt-get install protobuf-compiler
+    $ sudo apt-get install pylint
+    $ sudo apt-get install python3
+    $ sudo apt-get install python3-pip
+    $ sudo apt-get install python3-venv
     $ sudo apt install python3.8 python3.8-venv python3-venv python3-distutils
-    $ sudo apt-get install scons \
-    $ sudo apt-get install software-properties-common \
-    $ sudo apt-get install unzip \
+    $ sudo apt-get install scons
+    $ sudo apt-get install software-properties-common
+    $ sudo apt-get install unzip
     $ sudo apt-get install wget
     
     $ mkdir /tmp/gtest

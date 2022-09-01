@@ -65,9 +65,9 @@ https://code.visualstudio.com/docs/remote/ssh-tutorial
 
 - ssh 접속 
 
-    - https://lts0606.tistory.com/m/222
+    - **https://lts0606.tistory.com/m/222** (openssh 설치)
 
-    - https://shanepark.tistory.com/195
+    - https://shanepark.tistory.com/195 (ssh-key gen 및 remote ssh)
 
     - https://jihyewoo.tistory.com/74
 
