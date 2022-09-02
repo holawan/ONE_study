@@ -285,14 +285,27 @@ def _call_driver(driver_name, options):
 
 ```python
 #utils.py
+import argparse
+import configparser
+import glob
+import importlib
+import ntpath
+import os
+import subprocess
+import sys
+
 def _run(cmd, err_prefix=None, logfile=None):
     """Execute command in subprocess
-
+		하위 프로레스에 명령 실행 
     Args:
         cmd: command to be executed in subprocess
+        cmd : 하위 프로세스에 실행할 명령 
         err_prefix: prefix to be put before every stderr lines
+        err_prefix : 모든 stderr 행 앞에 붙이는 접두사 
         logfile: file stream to which both of stdout and stderr lines will be written
+        logfile : stdout 및 stderr 행이 모두 기록될 파일 스트림 
     """
+    #cmd를 인자로 받고, stdout과 stderr을 PIPE에서 가져옴 
     with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
         import select
         inputs = set([p.stdout, p.stderr])
@@ -317,9 +330,86 @@ def _run(cmd, err_prefix=None, logfile=None):
         sys.exit(p.returncode)
 ```
 
+- with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
 
+    https://soooprmx.com/python-subprocess-1/
+
+    - subsprocess는 파이썬 스크립트에서 쉘 명령 등 다른 프로세스를 실행하고 출력 결과를 가져올 수 있게 하는 라이브러리로, subprocess 모듈은 os.system, os.spawn* 등을 대체하기 위해 만들어진 모듈이다. 
+
+    - Subprocess
+
+        - 서브 프로세스는 외부 운영체제 명령을 실행할 때 사용되는 프로세스이며, 나중에 출력을 조작해 서브 프로세스 모드에서 새 명령을 생성할 수 있도록 함 
+
+        - 프로세스는 stdin, stdout, stderr를 PIPE option에 입력하고, 작성된 코드를 반환함 
+
+            - ex) `df-h`를 실행하면 사용된 마운트의 크기를 반환하는데, 이를 subproecess로 작성하면
+
+                ```python
+                cmd = "df -h"
+                subprocess.Popen(cmd, shell=True)
+                ```
+
+                - out
+
+                    ```bash
+                    $ python utils.py 
+                    Filesystem            Size  Used Avail Use% Mounted on
+                    C:/Program Files/Git  476G  148G  329G  31% /
+                    D:                    477G  113M  477G   1% /d
+                    ```
+
+            - 오류인 경우 입력 
+
+                ```python
+                cmd = "df -asdasdh"
+                subprocess.Popen(cmd, shell=True)
+                ```
+
+                - out
+
+                    ```bash
+                    $ python utils.py 
+                    df: unknown option -- f
+                    Try 'df --help' for more information.
+                    ```
+
+            
+
+    - **Popen**
+
+        - 다양한 옵션을 통해 call(), check_output()명령어보다 훨씬 유연하게 서브프로세스를 실행하고, 결과값을 가져옴 
+
+        - subprocess.PIPE 
+
+            - 표준 출력 내용 또는 표준 에러로 출력된 내용
+
+            - [`Popen`](https://docs.python.org/ko/3/library/subprocess.html#subprocess.Popen)의 *stdin*, *stdout* 또는 *stderr* 인자로 사용할 수 있고 표준 스트림에 대한 파이프를 열어야 함을 나타내는 특수 값. [`Popen.communicate()`](https://docs.python.org/ko/3/library/subprocess.html#subprocess.Popen.communicate)에서 가장 유용합니다.
+
+                https://docs.python.org/ko/3/library/subprocess.html
+
+            - ```python
+                cmd = ["df", "-h"]
+                test = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                out,err = test.communicate()
+                
+                print(f'out: {out}')
+                print(f'err :{err}')
+                # 표준 출력
+                out: b'Filesystem            Size  Used Avail Use% Mounted on\nC:/Program Files/Git  476G  148G  329G  32% /\nD:                    477G  113M  477G   1% /d\n'
+                err :b''
+                #오류
+                ## cmd의 1번째 인자를 -asdf로 바꿀 때 
+                out: b''
+                err :b"df: unknown option -- s\nTry 'df --help' for more information.\n"
+                ```
+
+            - 
 
 ## onecc 실행 
+
+https://github.com/Samsung/ONE/issues/7299
+
+
 
 1. 가상환경 설치
 

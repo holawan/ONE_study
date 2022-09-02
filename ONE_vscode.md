@@ -42,7 +42,7 @@ https://code.visualstudio.com/docs/remote/ssh-tutorial
 
     - 자동 종료 활성화 후 종료 
 
-##### 2). connect ssh
+##### 2) connect ssh
 
 - bash terminal에서 user@hostname로 접속 확인
 
@@ -74,6 +74,44 @@ https://code.visualstudio.com/docs/remote/ssh-tutorial
 - VirtualBox로 리눅스 (Ubuntu18.04 설치)
     - https://sh-safer.tistory.com/132
 
+- ubuntu
+
+```
+dpkg -l | grep ssh 
+apt-get update 
+
+apt-get install openssh-server 
+
+dpkg -l | grep ssh
+```
+
+- window 
+
+    ```
+    $ ssh-keygen -t rsa
+    $ mkdir ~/.ssh
+    $ touch ~/.ssh/authorized_keys
+    $ chmod 755 ~/.ssh/authorized_keys
+    ```
+
+    - host의 ~/.ssh/id_rsa.pub를 복사
+
+- ubuntu
+
+    ```
+    $ vi authorized_keys
+    ```
+
+    - 위에서 복사한 내용 붙여넣기 
+
+- window
+
+    ```
+    $ ssh username@hostname
+    ```
+
+    
+
 ### 4. ONE-vscode 확장 설치
 
 - [one-vscode-0.3.0.vsix](https://github.com/Samsung/ONE-vscode/releases/download/0.3.0/one-vscode-0.3.0.vsix) 
@@ -104,4 +142,4 @@ https://code.visualstudio.com/docs/remote/ssh-tutorial
 
 - 아래와 비슷한 오류가 뜨면서 뭔가 잘 안 된다면, [파일] - [폴더 열기]를 해서 /home/user명/.vscode-server/extensions 경로의 samsung.one-vscode-0.3.0을 선택해보기
 
-    ![KakaoTalk_20220830_155847055](ONE_vscode.assets/KakaoTalk_20220830_155847055.png)
+    ![KakaoTalk_20220830_155847055](ONE_vscode.assets/KakaoTalk_20220830_155847055.png)ifc

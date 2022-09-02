@@ -51,8 +51,30 @@
     
     $ pip3 install yapf==0.22.0 numpy
     ```
-    
-    
+
+- python 우선순위를 3.8로 변경
+
+    - python 3.8 재설치
+
+        ```
+        $ sudo apt install python3.8
+        ```
+
+    - python 우선순위 설정 확인
+
+        ```
+        $ sudo update-alternatives --config python
+        
+        update-alternatives: error: no alternatives for python
+        ```
+
+        - 우선순위가 없다고 나옴 
+
+    - python 3.8을 우선순위로 설정
+
+        ```
+        $ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+        ```
 
 ### 2. One configure
 
@@ -63,10 +85,16 @@
     ```
     $ git clone https://github.com/Samsung/ONE.git one
     $ cd one
+    #configure 
     $ ./nncc configure
+    #build 
     $ ./nncc build
+    #unit test
+    $ ./nncc test
+    
+    $ ./nnas create-package --prefix $HOME/.local
     ```
-
+    
     
 
 #### ./nncc configure 과정에서 에러 발생 
