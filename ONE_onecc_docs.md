@@ -1,8 +1,6 @@
-# ONECC
+# ONECC문서 
 
-## ONECC 문서 
-
-### how-to-prepare-virtualenv.txt
+## how-to-prepare-virtualenv.txt
 
 #### About
 
@@ -40,7 +38,7 @@ There will be venv folder as of result.
 
 </hr>
 
-### how-to-create-hdf5-dataset
+## how-to-create-hdf5-dataset
 
 #### About
 
@@ -112,7 +110,13 @@ img_files
 $ pip install Pillow numpy
 ```
 
+- Pillow 설치 에러 시 pip 문제일 수 있으므로 pip 재설치
 
+    ```
+    pip install -U --force-reinstall pip 
+    ```
+
+    https://hg4535.tistory.com/entry/pip-%EC%97%85%EB%8D%B0%EC%9D%B4%ED%8A%B8-%EC%97%90%EB%9F%AC-%EC%9E%AC%EC%84%A4%EC%B9%98-NoneType-object-has-no-attribute-bytes
 
 - Run the pre-processing logic for the target model. We provide a short python script that scales the image data from -1 to 1.
     - 대상 모델에 대한 전처리 로직 실행. 우리는 이미지 데이터를 -1~1로 조정하는 짧은 python script를 제공한다.  
@@ -181,7 +185,7 @@ $ h5dump dataset.h5
 
 </hr>
 
-### how-to-use-one-commands
+## how-to-use-one-commands
 
 #### About
 

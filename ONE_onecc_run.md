@@ -409,6 +409,42 @@ def _run(cmd, err_prefix=None, logfile=None):
 
 https://github.com/Samsung/ONE/issues/7299
 
+- 사전작업
+
+    - one-compiler 
+
+    ```
+    $ git clone https://github.com/Samsung/ONE.git one
+    $ cd one
+    #configure 
+    $ ./nncc configure
+    #build 
+    $ ./nncc build
+    #unit test
+    $ ./nncc test
+    
+    $ ./nnas create-package --prefix $HOME/.local
+    
+    
+    ```
+
+    - one-vscode
+
+        - [one-vscode-0.3.0.vsix](https://github.com/Samsung/ONE-vscode/releases/download/0.3.0/one-vscode-0.3.0.vsix) 
+
+            - 해당 파일 다운로드 
+
+        - 원격 탐색기에서 로컬에 폴더 연결
+
+            - 드롭다운 방식으로 다운받은 파일 옮기기기
+
+            ![image-20220830110757031](one_vscode.assets/image-20220830110757031.png)
+
+        - 설치
+
+            ```bash
+            code --install-extension one-vscode-0.3.0.vsix
+            ```
 
 
 1. 가상환경 설치
@@ -440,4 +476,339 @@ https://github.com/Samsung/ONE/issues/7299
     https://github.com/Samsung/ONE
     ```
 
-3. 
+
+
+### pb to circle
+
+https://github.com/Samsung/ONE/blob/a4ca4318c1f9331a102a7ab8c544794a108cffbf/docs/nncc/v1.0.0/tutorial.md
+
+https://github.com/Samsung/ONE/blob/master/compiler/one-cmds/onecc.template.cfg
+
+1. test data download
+
+    ```
+    $ wget https://storage.googleapis.com/download.tensorflow.org/models/tflite/model_zoo/upload_20180427/inception_v3_2018_04_27.tgz
+    $ tar -xvf inception_v3_2018_04_27.tgz
+    ```
+
+2. create onecc.tempate.cfg
+
+    ```
+    $ vi onecc-test.template.cfg
+    
+    ; To activate a step (or task),
+    ; set True for the step in [onecc] section and fill options in the corresponding section
+    [onecc]
+    ; neural network model to circle
+    one-import-tf=True
+    one-import-tflite=False
+    one-import-bcq=False
+    one-import-onnx=False
+    ; circle to circle with optimization
+    one-optimize=True
+    ; circle to circle with quantization
+    one-quantize=False
+    ; partition circle
+    one-partition=False
+    ; package circle and metadata into nnpackage
+    one-pack=True
+    ; generate code for backend
+    one-codegen=False
+    ; profile
+    one-profile=False
+    ; infer
+    one-infer=False
+    
+    [one-import-tf]
+    # mandatory
+    ; pb file
+    input_path=inception_v3.pb
+    ; circle file
+    output_path=inception_v3_onecc.circle
+    # optional
+    ; v1 or v2
+    converter_version=v1
+    ; graph_def(default), saved_model or keras_model
+    model_format=graph_def
+    # optional but mandatory for model_format=graph_def
+    ; input tensor names of the input arrays, comma-separated
+    input_arrays=input
+    ; output tensor names of the input arrays, comma-separated
+    output_arrays=InceptionV3/Predictions/Reshape_1
+    ; input shapes corresponding to --input_arrays, colon-separated.(ex:1,4,4,3:1,20,20,3)
+    input_shapes=1,299,299,3
+    
+    [one-import-tflite]
+    # mandatory
+    ; tflite file
+    input_path=
+    ; circle file
+    output_path=
+    
+    [one-import-bcq]
+    # mandatory
+    ; bcq file
+    input_path=
+    ; circle file
+    output_path=
+    # optional
+    ; v1 or v2
+    converter_version=v2
+    ; graph_def(default), saved_model or keras_model
+    model_format=graph_def
+    # optional but mandatory for model_format=graph_def
+    ; input tensor names of the input arrays, comma-separated
+    input_arrays=
+    ; output tensor names of the input arrays, comma-separated
+    output_arrays=
+    ; input shapes corresponding to --input_arrays, colon-separated.(ex:1,4,4,3:1,20,20,3)
+    input_shapes=
+    
+    [one-import-onnx]
+    # mandatory
+    ; onnx file
+    input_path=
+    ; circle file
+    output_path=
+    # optional
+    ; True or False
+    unroll_rnn=
+    ; True or False
+    unroll_lstm=
+    
+    [one-optimize]
+    # mandatory
+    ; circle file
+    input_path=inception_v3_onecc.circle
+    ; circle file
+    output_path=inception_v3_onecc.opt.circle
+    # //TODO: Add available options
+    generate_profile_data=False
+    
+    [one-quantize]
+    # mandatory
+    ; circle file
+    input_path=
+    ; circle file
+    output_path=
+    # optional arguments for quantization
+    ; input data file (if not given, random data will be used for calibration)
+    input_data=
+    ; h5/hdf5(default), list/filelist, or dir/directory
+    input_data_format=
+    ; dtype of quantized model (uint8(default), int16)
+    quantized_dtype=
+    ; granularity of quantization (layer(default), channel)
+    granularity=
+    ; dtype of model's input (uint8, int16, float32). Same with quantized_dtype by default.
+    input_type=
+    ; dtype of model's output (uint8, int16, float32). Same with quantized_dtype by default.
+    output_type=
+    
+    [one-partition]
+    # mandatory
+    ; partition file which provides backend to assign
+    part_file=
+    ; circle file
+    input_file=
+    # //TODO: Add available options
+    
+    [one-pack]
+    # mandatory
+    ; input path
+    input_path=inception_v3_onecc.opt.circle
+    ; output path
+    output_path=inception_v3_onecc_pack
+    # //TODO: Add available options
+    
+    [one-codegen]
+    # mandatory
+    ; backend name
+    backend=
+    ; commands for each backend
+    command=
+    
+    [one-profile]
+    # mandatory
+    ; backend name
+    backend=
+    # //TODO: Add available options
+    
+    [one-infer]
+    # mandatory (mutually exclusive)
+    ; backend name
+    backend=
+    ; driver name
+    driver=
+    # //TODO: Add available options
+    ```
+
+3. 실행
+
+    ```
+    holawan@DESKTOP-KVCQHCD:~/onecc-test$ onecc -C onecc-test.template.cfg 
+    Estimated count of arithmetic ops: 11.460 G  ops, equivalently 5.730 G  MACs
+    model2nnpkg.sh: Generating nnpackage inception_v3_onecc.opt in inception_v3_onecc_pack
+    ```
+
+    
+
+#### tflite to circle
+
+1. test data download
+
+    ```
+    $ wget https://storage.googleapis.com/download.tensorflow.org/models/tflite/model_zoo/upload_20180427/inception_v3_2018_04_27.tgz
+    $ tar -xvf inception_v3_2018_04_27.tgz
+    ```
+
+2. create onecc.template.cfg
+
+    ```python
+    ; To activate a step (or task),
+    ; set True for the step in [onecc] section and fill options in the corresponding section
+    [onecc]
+    ; neural network model to circle
+    one-import-tf=False
+    one-import-tflite=True
+    one-import-bcq=False
+    one-import-onnx=False
+    ; circle to circle with optimization
+    one-optimize=False
+    ; circle to circle with quantization
+    one-quantize=False
+    ; partition circle
+    one-partition=False
+    ; package circle and metadata into nnpackage
+    one-pack=True
+    ; generate code for backend
+    one-codegen=False
+    ; profile
+    one-profile=False
+    ; infer
+    one-infer=False
+    
+    [one-import-tf]
+    # mandatory
+    ; pb file
+    input_path=
+    ; circle file
+    output_path=
+    # optional
+    ; v1 or v2
+    converter_version=v2
+    ; graph_def(default), saved_model or keras_model
+    model_format=graph_def
+    # optional but mandatory for model_format=graph_def
+    ; input tensor names of the input arrays, comma-separated
+    input_arrays=
+    ; output tensor names of the input arrays, comma-separated
+    output_arrays=
+    ; input shapes corresponding to --input_arrays, colon-separated.(ex:1,4,4,3:1,20,20,3)
+    input_shapes=
+    
+    [one-import-tflite]
+    # mandatory
+    ; tflite file
+    input_path=inception_v3.tflite
+    ; circle file
+    output_path=inecption_v3_onecc2.circle
+    
+    [one-import-bcq]
+    # mandatory
+    ; bcq file
+    input_path=
+    ; circle file
+    output_path=
+    # optional
+    ; v1 or v2
+    converter_version=v2
+    ; graph_def(default), saved_model or keras_model
+    model_format=graph_def
+    # optional but mandatory for model_format=graph_def
+    ; input tensor names of the input arrays, comma-separated
+    input_arrays=
+    ; output tensor names of the input arrays, comma-separated
+    output_arrays=
+    ; input shapes corresponding to --input_arrays, colon-separated.(ex:1,4,4,3:1,20,20,3)
+    input_shapes=
+    
+    [one-import-onnx]
+    # mandatory
+    ; onnx file
+    input_path=
+    ; circle file
+    output_path=
+    # optional
+    ; True or False
+    unroll_rnn=
+    ; True or False
+    unroll_lstm=
+    
+    [one-optimize]
+    # mandatory
+    ; circle file
+    input_path=inecption_v3_onecc2.circle
+    ; circle file
+    output_path=inecption_v3_onecc2.opt.circle
+    # //TODO: Add available options
+    
+    [one-quantize]
+    # mandatory
+    ; circle file
+    input_path=
+    ; circle file
+    output_path=
+    # optional arguments for quantization
+    ; input data file (if not given, random data will be used for calibration)
+    input_data=
+    ; h5/hdf5(default), list/filelist, or dir/directory
+    input_data_format=
+    ; dtype of quantized model (uint8(default), int16)
+    quantized_dtype=
+    ; granularity of quantization (layer(default), channel)
+    granularity=
+    ; dtype of model's input (uint8, int16, float32). Same with quantized_dtype by default.
+    input_type=
+    ; dtype of model's output (uint8, int16, float32). Same with quantized_dtype by default.
+    output_type=
+    
+    [one-partition]
+    # mandatory
+    ; partition file which provides backend to assign
+    part_file=
+    ; circle file
+    input_file=
+    # //TODO: Add available options
+    
+    [one-pack]
+    # mandatory
+    ; input path
+    input_path=
+    ; output path
+    output_path=
+    # //TODO: Add available options
+    
+    [one-codegen]
+    # mandatory
+    ; backend name
+    backend=
+    ; commands for each backend
+    command=
+    
+    [one-profile]
+    # mandatory
+    ; backend name
+    backend=
+    # //TODO: Add available options
+    
+    [one-infer]
+    # mandatory (mutually exclusive)
+    ; backend name
+    backend=
+    ; driver name
+    driver=
+    # //TODO: Add available options
+    ```
+
+    
