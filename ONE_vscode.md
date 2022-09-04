@@ -77,7 +77,7 @@ https://code.visualstudio.com/docs/remote/ssh-tutorial
 - ubuntu
 
 ```
-dpkg -l | grep ssh 
+ssh
 apt-get update 
 
 apt-get install openssh-server 
@@ -99,7 +99,9 @@ dpkg -l | grep ssh
 - ubuntu
 
     ```
+    $ cd ~./ssh
     $ vi authorized_keys
+    $ sudo service ssh start
     ```
 
     - 위에서 복사한 내용 붙여넣기 

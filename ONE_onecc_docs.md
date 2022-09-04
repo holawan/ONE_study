@@ -282,8 +282,6 @@ one-optimize=True
 one-quantize=False
 one-pack=True
 one-codegen=False
-```
-
 [one-import-tf]
 ...
 
@@ -293,6 +291,7 @@ one-codegen=False
 [one-pack]
 
 ...
+```
 
 See 'one-build.template.cfg' for more details.
 
