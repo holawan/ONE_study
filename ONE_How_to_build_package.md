@@ -1,3 +1,5 @@
+[toc]
+
 # How to build package
 
 https://nnfw.readthedocs.io/en/latest/howto/how-to-build-package.html

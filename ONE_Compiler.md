@@ -1,3 +1,5 @@
+[toc]
+
 # ONE Compiler
 
 ## One compiler build 

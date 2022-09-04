@@ -1,3 +1,5 @@
+[toc]
+
 # ONE TEST
 
 ## tests

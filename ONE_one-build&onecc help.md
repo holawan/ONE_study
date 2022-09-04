@@ -1,3 +1,5 @@
+[toc]
+
 # ONECC
 
 ## one-build/onecc help
