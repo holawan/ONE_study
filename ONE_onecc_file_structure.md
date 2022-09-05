@@ -5,6 +5,7 @@
 ## onecc 파일 구조
 
 ```python
+#onecc
 #!/usr/bin/env bash
 ''''export SCRIPT_PATH="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)" # '''
 ''''export PY_PATH=${SCRIPT_PATH}/venv/bin/python                                       # '''
@@ -173,6 +174,7 @@ if __name__ == '__main__':
 ### _check_subtool_exists()
 
 ```python
+#onecc
 subtool_list = {
     'compile': {
         'import': 'Convert given model to circle',
@@ -239,7 +241,7 @@ print(subtool_keys)
     #출력된 리스트의 길이가 1보다 크고, 1번째(zero-base) 값이 subtool_keys리스트에 있을 때  
     if len(sys.argv) > 1 and sys.argv[1] in subtool_keys:
         
-        #driver_name은 예를 들어,sys.argv가 ['one-cmds/onecc.py', 'import']이고, sys.argv[1]이 import일 경우 'one-import' 형태 
+        #driver_name은 예를 들어,sys.argv가 ['onecc', 'import']이고, sys.argv[1]이 import일 경우 'one-import' 형태 
         driver_name = 'one-' + sys.argv[1]
         
         #나머지 리스트의 값들은 옵션 
@@ -247,6 +249,7 @@ print(subtool_keys)
        
     	#driver_name과 options를 인자로 _call_driver 호출 
         _call_driver(driver_name, options)
+        #subtool_keys가 입력에 존재할 때, _call_driver를 호출 후 해당 compile 종료
         sys.exit(0)
 ```
 
@@ -254,34 +257,52 @@ print(subtool_keys)
 
 - 사용자가 입력한 인자 중 python 이후 cmd에 입력된 인자값들을 띄어쓰기 단위로 리스트로 묶어 출력하는 것 
 
-- 현재 레포 형태에서는 어떤 값을 주고, 어떤 값을 출력할지 모르겠음
-
     ```
-    $ python one-cmds/onecc.py hello world
+    $ onecc import tflite -i inception_v3.tflite -o inception_v3_import.circle
     ['one-cmds/onecc.py', 'hello', 'world']
     ```
+
+#### 정리
+
+- 입력된 커맨드의 1번째 요소에 import, optimize 등 subtool_list에 있는 인자일 때, 해당 인자에 `one-`를 붙이고, 나머지 값들은 option으로 `_call_driver` 함수를 실행 
+- 실행 후 compile 종료  
 
 ### _call_driver
 
 ```python
+#onecc
 def _call_driver(driver_name, options):
     
-    #dir_path는 현재 디렉토리 선언 
-    ## one/compiler/one_cmds
+    #dir_path는 cmd를 실행할 .local/bin
+    ## /home/holawan/.local/bin
     dir_path = os.path.dirname(os.path.realpath(__file__))
     
-    #현재 디렉토리 하위에 driver_name으로 폴더 생성 
+    #현재 디렉토리 하위에 driver_name 명령을 변수로 선언 
     ## import가 sys.argv의 1번 인자였다면, one-import 경로 생성
-    ## one/compiler/one_cmds/one-import
+    ## /home/holawan/.local/bin/one-import
     driver_path = os.path.join(dir_path, driver_name)
     
     #cmd는 driver_path에, option 추가 
-    ## option이 hello라면 
-    ## ["/home/holawan/one/compiler/one-cmds/one-import",'hello']
+    ## driver_name이 import이고, 옵션이 ['tflite', '-i', 'inception_v3.tflite', '-o', 'inception_v3_import.circle'] 다음과 같다면  
+    ## cmd는 해당 명령 
+    ### ['/home/holawan/.local/bin/one-import', 'tflite', '-i', 'inception_v3.tflite', '-o', 'inception_v3_import.circle']
     cmd = [driver_path] + options
     _utils._run(cmd)
 
 ```
+
+#### 정리
+
+- `~/.local/bin` 경로에서,  입력된 커맨드에 따른 명령을 실행
+
+    - ex)
+
+        ```
+        onecc import tflite -i inception_v3.tflite -o inception_v3_import.circle
+        ```
+
+        - 해당 명령이 있을 때, 1번자가 import로, subtool_keys에 있어서 `if len(sys.argv) > 1 and sys.argv[1] in subtool_keys` 이하 구문 으로 들어옴. 
+        - 그렇다면, `_call_driver`를 호출해 , 해당 커맨드를 실행하고, 종료됨 
 
 #### \_utils._run
 
@@ -377,6 +398,38 @@ https://soooprmx.com/python-subprocess-1/
 
         
 
+- **with**
+
+    - with 절은 자원을 획득하고, 사용하고, 반납할 때 주로 사용한다.
+
+    - 파이썬의 컨택세트 매니저는 리소스를 `with`문법을 통해 `with`절에서만 액세스 가능헤가 하고, 블록을 나가면 리소스를 해제한다. 
+
+    ```python
+    with {expression} as {valiable} :
+        block..
+    ```
+
+    - 샘플코드
+
+        - 파일을 읽고 종료하는 코드 
+
+            - 기존
+
+            ```python
+            f = open('myFile.txt', 'w', encoding='utf8')
+            f.write('test')
+            f.close 
+            ```
+
+        - with 절 사용
+
+            ```python
+            with open('mytextfile.txt', 'r', encoding='utf-8') as f: 
+                f.write('test')
+            ```
+
+    
+
 - **Popen**
 
     - 다양한 옵션을 통해 call(), check_output()명령어보다 훨씬 유연하게 서브프로세스를 실행하고, 결과값을 가져옴 
@@ -405,4 +458,48 @@ https://soooprmx.com/python-subprocess-1/
             err :b"df: unknown option -- s\nTry 'df --help' for more information.\n"
             ```
 
-        - 
+
+### get_parser()
+
+```python
+#onecc
+def _get_parser():
+    onecc_usage = 'onecc [-h] [-v] [-C CONFIG] [-W WORKFLOW] [-O OPTIMIZATION] [COMMAND <args>]'
+    onecc_desc = 'Run ONE driver via several commands or configuration file'
+    parser = argparse.ArgumentParser(description=onecc_desc, usage=onecc_usage)
+    print(parser)
+    _utils._add_default_arg(parser)
+
+    opt_name_list = _utils._get_optimization_list(get_name=True)
+    opt_name_list = ['-' + s for s in opt_name_list]
+    if not opt_name_list:
+        opt_help_message = '(No available optimization options)'
+    else:
+        opt_help_message = '(Available optimization options: ' + ', '.join(
+            opt_name_list) + ')'
+    opt_help_message = 'optimization name to use ' + opt_help_message
+    parser.add_argument('-O', type=str, metavar='OPTIMIZATION', help=opt_help_message)
+
+    parser.add_argument(
+        '-W', '--workflow', type=str, metavar='WORKFLOW', help='run with workflow file')
+
+    # just for help message
+    compile_group = parser.add_argument_group('compile to circle model')
+    for tool, desc in subtool_list['compile'].items():
+        compile_group.add_argument(tool, action='store_true', help=desc)
+
+    package_group = parser.add_argument_group('package circle model')
+    for tool, desc in subtool_list['package'].items():
+        package_group.add_argument(tool, action='store_true', help=desc)
+
+    backend_group = parser.add_argument_group('run backend tools')
+    for tool, desc in subtool_list['backend'].items():
+        backend_group.add_argument(tool, action='store_true', help=desc)
+
+    return parser
+```
+
+
+
+#### argparse
+
