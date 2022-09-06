@@ -466,24 +466,33 @@ https://soooprmx.com/python-subprocess-1/
 def _get_parser():
     onecc_usage = 'onecc [-h] [-v] [-C CONFIG] [-W WORKFLOW] [-O OPTIMIZATION] [COMMAND <args>]'
     onecc_desc = 'Run ONE driver via several commands or configuration file'
+    #설명은 onecc-=_dsec, usage=onec_usage로 parser 생성 parser instacne 
     parser = argparse.ArgumentParser(description=onecc_desc, usage=onecc_usage)
-    print(parser)
+    
+    #_utils에 정의된 기본 argument추가 
+    ## version, verbose, config, section
     _utils._add_default_arg(parser)
-
+	
+    #~/.local/optimization/ 에 위치한 O*.cfg 파일 모두 가져오기 
     opt_name_list = _utils._get_optimization_list(get_name=True)
     opt_name_list = ['-' + s for s in opt_name_list]
+    #정의된 파일이 없다면 사용가능한 옵션이 없음을 표시 
     if not opt_name_list:
         opt_help_message = '(No available optimization options)'
+    #있다면 사용 가능한 옵션들 표시 
     else:
         opt_help_message = '(Available optimization options: ' + ', '.join(
             opt_name_list) + ')'
     opt_help_message = 'optimization name to use ' + opt_help_message
+    #optimization 관련 argument추가 
     parser.add_argument('-O', type=str, metavar='OPTIMIZATION', help=opt_help_message)
-
+	
+    #workflow 관련 argument 추가 
     parser.add_argument(
         '-W', '--workflow', type=str, metavar='WORKFLOW', help='run with workflow file')
 
     # just for help message
+    ## subtool_list에 있는 옵션들 argument에 추가 
     compile_group = parser.add_argument_group('compile to circle model')
     for tool, desc in subtool_list['compile'].items():
         compile_group.add_argument(tool, action='store_true', help=desc)
@@ -503,3 +512,140 @@ def _get_parser():
 
 #### argparse
 
+- 코드가 너무 긴 관계로, 형식 설명 
+
+- argparse 모듈은 사용자 친화적인 명령행 인터페이스를 쉽게 작성하도록 도움 
+- 프로그램이 필요한 인자를 정의하면, argparse는 sys.argv를 어떻게 파싱할지 파악함
+- 또한 argparse 모듈은 도움말과 사용법 메시지를 자동 생성하고, 사용자가 프로그램에 잘못된 인자를 줄 때, 에러를 발생시킴 
+
+- **parser**는 ArgumentParser의 객체로 파일이 실행될 때, 설명 및 help 메시지를 담는 역할로 파악됨 
+    - parser 객체는 명령행을 파이썬 데이터형으로 파싱하는데 필요한 모든 정보를 가지고 있음 
+- parser instance를 선언하고, description이나 usage, default value를 지정
+- `parser.add_argument()` method를 통해 프로그램의 인자에 대한 정보를 채움 
+- `parse_args()`라는 method로 명령창에서 주어진 인자를 parsing함 
+
+- **ArgumentParser의 인자**
+
+    - usage : 프로그램 사용법을 설명하는 문자열 (기본값: 파서에 추가된 인자로부터 만들어지는 값 )
+
+    - description : 인자 도움말 전에 표시할 텍스트 (기본값: none)
+    - add_help : 파서에 `-h/--help` 옵션을 추가 (기본값 : none)
+
+- **예**
+
+    ```python
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('integers', metavar='N', type=int, nargs='+',
+                        help='an integer for the accumulator')
+    parser.add_argument('--sum', dest='accumulate', action='store_const',
+                        const=sum, default=max,
+                        help='sum the integers (default: find the max)')
+    
+    args = parser.parse_args()
+    print(args.accumulate(args.integers))
+    ```
+
+    - **실행 결과 **
+
+        ```
+        $ python argparse_test.py -h
+        usage: argparse_test.py [-h] [--sum] N [N ...]
+        
+        Process some integers.
+        
+        positional arguments:
+          N           an integer for the accumulator
+        
+        optional arguments:
+          -h, --help  show this help message and exit
+          --sum       sum the integers (default: find the max)
+        ```
+
+        ```
+        $ python argparse_test.py 
+        usage: argparse_test.py [-h] [--sum] N [N ...]
+        argparse_test.py: error: the following arguments are required: N
+        ```
+
+        
+
+#### -get_optimization_list(get_name=False)
+
+```python
+def _get_optimization_list(get_name=False):
+    """
+    returns a list of optimization. If `get_name` is True,
+    only basename without extension is returned rather than full file path.
+
+    [one hierarchy]
+    one
+    ├── backends
+    ├── bin
+    ├── doc
+    ├── include
+    ├── lib
+    ├── optimization
+    └── test
+
+    Optimization options must be placed in `optimization` folder
+    """
+    #dir_path: ~/.local/bin
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    # optimization folder
+    #optimization/O*cfg 파일을 모두 files에 담음 
+    files = [f for f in glob.glob(dir_path + '/../optimization/O*.cfg', recursive=True)]
+
+    # exclude if the name has space
+    #파일명에 공백이 있으면 제거 
+    files = [s for s in files if not ' ' in s]
+	
+    #optimization lsit 
+    opt_list = []
+    for cand in files:
+        base = ntpath.basename(cand)
+        if os.path.isfile(cand) and os.access(cand, os.R_OK):
+            opt_list.append(cand)
+
+    if get_name == True:
+        # NOTE the name includes prefix 'O'
+        # e.g. O1, O2, ONCHW not just 1, 2, NCHW
+        opt_list = [ntpath.basename(f) for f in opt_list]
+        opt_list = [_remove_suffix(s, '.cfg') for s in opt_list]
+
+    return opt_list
+```
+
+- ~/.local/optimization 폴더 하위 모든 O*.cfg 파일을 가져와서 리스트에 추가
+- 상위 root 제거 후 파일 이름만 리스트에 저장 
+- .cfg 제거 후 파일 명만 리스트에 저장 
+- 해당 리스트 리턴 
+- 리턴된 리스트는 `_get_parser()` 아래 opt_name_list의 출력값으로 parsing 결과에 사용가능한 Optimization으로 표시됨 
+
+
+
+### _verify_arg(parser,args) 
+
+```python
+def _verify_arg(parser, args):
+    """verify given arguments"""
+    # check if required arguments is given
+    
+    #만약 config 커맨드나 workflow 커맨드가 없다면 에러 리턴 
+    if not _utils._is_valid_attr(args, 'config') and not _utils._is_valid_attr(
+            args, 'workflow'):
+        parser.error('-C/--config or -W/--workflow argument is required')
+    # check if given optimization option exists
+    #optimization 파일들의 유효성 검사 
+    opt_name_list = _utils._get_optimization_list(get_name=True)
+    opt_name_list = [_utils._remove_prefix(s, 'O') for s in opt_name_list]
+    if _utils._is_valid_attr(args, 'O'):
+        if ' ' in getattr(args, 'O'):
+            parser.error('Not allowed to have space in the optimization name')
+        if not getattr(args, 'O') in opt_name_list:
+            parser.error('Invalid optimization option')
+```
+
+- argument 유효성 검사 
+    - 커맨드에 config나 workflow가 없다면 
