@@ -49,24 +49,41 @@ subtool_list = {
 }
 
 
+#onecc
 def _call_driver(driver_name, options):
-
+    
+    #dir_path는 cmd를 실행할 .local/bin
+    ## /home/holawan/.local/bin
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    print(dir_path)
+    
+    #현재 디렉토리 하위에 driver_name 명령을 변수로 선언 
+    ## import가 sys.argv의 1번 인자였다면, one-import 경로 생성
+    ## /home/holawan/.local/bin/one-import
     driver_path = os.path.join(dir_path, driver_name)
-    print(driver_path)
+    
+    #cmd는 driver_path에, option 추가 
+    ## driver_name이 import이고, 옵션이 ['tflite', '-i', 'inception_v3.tflite', '-o', 'inception_v3_import.circle'] 다음과 같다면  
+    ## cmd는 해당 명령 
+    ### ['/home/holawan/.local/bin/one-import', 'tflite', '-i', 'inception_v3.tflite', '-o', 'inception_v3_import.circle']
     cmd = [driver_path] + options
+    #실행 
     _utils._run(cmd)
+
 
 
 def _check_subtool_exists():
     """verify given arguments"""
+    #subtool_list의 value들을 순회하며 value들의 key 값을 subtool_keys에 추가 
     subtool_keys = [n for k, v in subtool_list.items() for n in v.keys()]
-    print(sys.argv)
-    if len(sys.argv) > 1 and sys.argv[2] in subtool_keys:
-        driver_name = 'one-' + sys.argv[2]
-        options = sys.argv[3:]
+    #출력된 리스트의 길이가 1보다 크고, 1번째(zero-base) 값이 subtool_keys리스트에 있을 때  
+    if len(sys.argv) > 1 and sys.argv[1] in subtool_keys:
+        #dirver_name을 one-import 형식으로 변환 
+        driver_name = 'one-' + sys.argv[1]
+        #나머지 인자들은 옵션 
+        options = sys.argv[2:]
+        #_calldriver 호출 
         _call_driver(driver_name, options)
+        #프로세스 종료 
         sys.exit(0)
 
 
@@ -109,6 +126,7 @@ def _get_parser():
 def _parse_arg(parser):
     args = parser.parse_args()
     # print version
+    #argument에 version이 있으면 버젼 출력 후 종료 
     if args.version:
         _utils._print_version_and_exit(__file__)
 

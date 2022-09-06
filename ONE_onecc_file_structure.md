@@ -193,12 +193,17 @@ subtool_list = {
 
 def _check_subtool_exists():
     """verify given arguments"""
-    #
+    #subtool_list의 value들을 순회하며 value들의 key 값을 subtool_keys에 추가 
     subtool_keys = [n for k, v in subtool_list.items() for n in v.keys()]
+    #출력된 리스트의 길이가 1보다 크고, 1번째(zero-base) 값이 subtool_keys리스트에 있을 때  
     if len(sys.argv) > 1 and sys.argv[1] in subtool_keys:
+        #dirver_name을 one-import 형식으로 변환 
         driver_name = 'one-' + sys.argv[1]
+        #나머지 인자들은 옵션 
         options = sys.argv[2:]
+        #_calldriver 호출 
         _call_driver(driver_name, options)
+        #프로세스 종료 
         sys.exit(0)
 ```
 
@@ -319,7 +324,7 @@ import sys
 
 def _run(cmd, err_prefix=None, logfile=None):
     """Execute command in subprocess
-		하위 프로레스에 명령 실행 
+		하위 프로세스에 명령 실행 
     Args:
         cmd: command to be executed in subprocess
         cmd : 하위 프로세스에 실행할 명령 
@@ -625,6 +630,37 @@ def _get_optimization_list(get_name=False):
 
 
 
+### _parse_arg(parser) 
+
+```python
+def _parse_arg(parser):
+    args = parser.parse_args()
+    # print version
+    if args.version:
+        _utils._print_version_and_exit(__file__)
+
+    return args
+```
+
+- argument에 `-v` or `--version`이 있으면 버젼 출력 후 종료 
+
+- 추가
+
+    - help메시지는 ?
+
+    - `-h` or `--help` 옵션은 상속한 ArgumentParser 클래스의 약속에 따라 종료되는 것 같다. 
+
+        ```python
+        if self.add_help:
+                    self.add_argument(
+                        default_prefix+'h', default_prefix*2+'help',
+                        action='help', default=SUPPRESS,
+                        help=_('show this help message and exit'))
+        ```
+
+    - `default=SUPPRESS` 
+        -  [`parse_args()`](https://docs.python.org/ko/3/library/argparse.html#argparse.ArgumentParser.parse_args) 호출에서 어트리뷰트 생성을 전역적으로 억제
+
 ### _verify_arg(parser,args) 
 
 ```python
@@ -648,4 +684,25 @@ def _verify_arg(parser, args):
 ```
 
 - argument 유효성 검사 
-    - 커맨드에 config나 workflow가 없다면 
+    - 커맨드에 config나 workflow가 없다면 에러 리턴 
+
+
+
+### main 마지막 명령 
+
+```python
+    #~/.local/bin
+    bin_dir = os.path.dirname(os.path.realpath(__file__))
+    if _utils._is_valid_attr(args, 'config'):
+        runner = CfgRunner(args.config)
+        runner.detect_import_drivers(bin_dir)
+        if _utils._is_valid_attr(args, 'O'):
+            runner.add_opt(getattr(args, 'O'))
+        runner.run(bin_dir)
+    elif _utils._is_valid_attr(args, 'workflow'):
+        runner = WorkflowRunner(args.workflow)
+        runner.run(bin_dir)
+```
+
+
+
