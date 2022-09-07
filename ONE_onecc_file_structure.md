@@ -693,15 +693,28 @@ def _verify_arg(parser, args):
 ```python
     #~/.local/bin
     bin_dir = os.path.dirname(os.path.realpath(__file__))
+    print(f'bin_dir{bin_dir}')
+
+    # print(_utils._is_valid_attr(args,'config'))
+    print(_utils._is_valid_attr(args,'workflow'))
+    #argument에 config 파일이 존재하면 
     if _utils._is_valid_attr(args, 'config'):
+        #config 파일로 Cfg runner 실행 
         runner = CfgRunner(args.config)
+        print(runner)
         runner.detect_import_drivers(bin_dir)
+
+        #Optimize가 존재하면 optimize 추가 실행 
         if _utils._is_valid_attr(args, 'O'):
             runner.add_opt(getattr(args, 'O'))
         runner.run(bin_dir)
+
+    #argument에 'workflow가 존재하면 
     elif _utils._is_valid_attr(args, 'workflow'):
+        #Workflow 파일로 Cfg runner 실행 
         runner = WorkflowRunner(args.workflow)
         runner.run(bin_dir)
+
 ```
 
 
