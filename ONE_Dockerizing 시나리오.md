@@ -1,9 +1,5 @@
 # ONE_Dockerizing 시나리오
 
-https://brunch.co.kr/@b30afb04c9f54dc/20
-
-https://www.interaction-design.org/literature/topics/user-scenarios
-
 ## User Scenario
 
 ### Who
@@ -25,7 +21,7 @@ https://www.interaction-design.org/literature/topics/user-scenarios
 
 ### Why
 
-- 현재 `onecc`, `one-build`는 Ubuntu 18.04, Ubuntu 20.04에서만 이용할 수 있기 때문에, 해당 환경이 아니라도 서비스를 이용하기 위함 
+- 현재 `onecc`, `one-build`는 Ubuntu 18.04, Ubuntu 20.04에서만 이용할 수 있지만, 해당 환경이 아니라도 서비스를 이용할 수 있게 하기 위함입니다.
 
 ### How
 
@@ -37,18 +33,24 @@ https://www.interaction-design.org/literature/topics/user-scenarios
 
         ```
         $ onecc-docker -C *.cfg
+        $ onecc-docker -W *.workflow.json
+        $ onecc-docekr -C *.cfg -O *.cfg
         ```
 
 3. 원하는 one-compiler version 선택 
 
 4. Docker container 실행
 
-    - Docker Image가 없을 때 
-        - User가 원하는 버전의 Docker Image 생성 
-        - Docker container 구동 
+    - User가 선택한 버전의 Docker image가 존재하는지 확인 
 
     - Docker Image가 없을 때 
-        - User가 원하는 버전의 Docker Image로 컨테이너 구동 
+
+        - User가 원하는 버전의 Docker Image 자동 생성 (write_dockerfile, docker image build)
+
+        - Docker container 구동 (docker container run)
+
+    - Docker Image가 있을 때 
+        - User가 원하는 버전의 Docker Image로 컨테이너 구동 (docker container run)
 
 5. Docker container 내부에서 volume으로 공유받은 `*.cfg` 및 TensorFlow Model로 Circle file 및 nnpackage 생성 
 
@@ -139,5 +141,3 @@ https://www.interaction-design.org/literature/topics/user-scenarios
     ├── labels.txt
     └── onecc.template.cfg
     ```
-
-    
