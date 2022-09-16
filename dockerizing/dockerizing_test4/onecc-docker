@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+''''exec "python3" "onecc-docker" "$@" #'''
+
+
+
+import sys
+import subprocess
+import json
+import os
+import re
+import requests
+
+
+def _is_image(version) : 
+    cmd = ['docker', 'images', f'onecc:{version}']
+    p = subprocess.Popen(cmd,  stdout=subprocess.PIPE, stderr=subprocess.STDOUT) 
+    out, err = p.communicate()
+    dic = {}
+
+    decoded_out = [i.split() for i in out.decode().split("\n") if len(i)]
+
+    if len(decoded_out) <2 :
+        return False
+
+    dic[decoded_out[0][0]] = decoded_out[1][0]
+    dic[decoded_out[0][1]] = decoded_out[1][1]
+
+    tag_name = cmd[2].split(':')
+
+    if dic['REPOSITORY'] == tag_name[0] and dic['TAG'] == tag_name[1]  :
+        return True 
+    else :
+        return False
+
+def write_dockerfile(script_path,version) :
+
+    with open(f'{script_path}/Dockerfile', 'w', encoding='utf-8') as dockerfile: 
+        dockerfile.write('# Copyright (c) 2022 Samsung Electronics Co., Ltd. All Rights Reserved \n')
+        dockerfile.write('# \n')
+        dockerfile.write('# Licensed under the Apache License, Version 2.0 (the "License"); \n')
+        dockerfile.write('# you may not use this file except in compliance with the License. \n')
+        dockerfile.write('# You may obtain a copy of the License at \n')
+        dockerfile.write('# \n')
+        dockerfile.write('#     http://www.apache.org/licenses/LICENSE-2.0 \n')
+        dockerfile.write('# \n')
+        dockerfile.write('# Unless required by applicable law or agreed to in writing, software \n')
+        dockerfile.write('# distributed under the License is distributed on an "AS IS" BASIS, \n')
+        dockerfile.write('# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. \n')
+        dockerfile.write('# See the License for the specific language governing permissions and \n')
+        dockerfile.write('# limitations under the License \n\n')
+        dockerfile.write('FROM ubuntu:18.04 \n\n')
+        dockerfile.write('RUN apt-get update && apt-get install -qqy \ \n')
+        dockerfile.write('    wget \ \n')
+        dockerfile.write('    && apt clean \n \n')
+        dockerfile.write(f'RUN wget https://github.com/Samsung/ONE/releases/download/{version}/one-compiler_{version}_amd64.deb \ \n')
+        dockerfile.write(f'    && apt-get install -y ./one-compiler_{version}_amd64.deb \ \n')
+        dockerfile.write('    && rm -rf /var/lib/apt/lists/* \n \n')
+        dockerfile.write('ENTRYPOINT ["onecc"] \n')
+
+
+def main():
+    onecc_version = subprocess.check_output("command -v onecc > /dev/null && echo $(onecc -v)", shell=True ,encoding='utf-8')
+    installed_onecc_version = onecc_version.split(' ')[2]
+
+    script_path = re.sub("\n", "", os.popen('pwd').read())
+    response = requests.get("https://api.github.com/repos/Samsung/ONE/tags")
+    if  response.status_code != 200 :
+        print(response.status_code)
+        print(response.reason)
+        print("we can't get recent tag")
+        exit(1)
+    else :
+        versions_str = response.content
+        versions_json = json.loads(versions_str)
+        recent_version = versions_json[0]["name"]
+
+    image_name = f"onecc:{recent_version}"
+
+    if not _is_image(recent_version):
+        write_dockerfile(script_path,recent_version)
+        build_cmd = ["docker", "build", "-t", image_name, script_path]
+        subprocess.call(build_cmd)
+        os.remove(f'{script_path}/Dockerfile')
+
+    write_dockerfile(script_path,recent_version)
+    contianer_name = f"onecc_{recent_version.replace('.','_')}"
+    user_cmd = ''.join(sys.argv[1:])
+    run_cmd = ["docker", "run", "--rm", "--name", contianer_name, "-v", "${HOME}:${HOME}", "-e", "HOME=${HOME}", "-w", script_path, image_name, user_cmd]
+    cmd = ' '.join(run_cmd)
+    subprocess.run(cmd,shell=True)
+
+if __name__ == "__main__":
+	main()
