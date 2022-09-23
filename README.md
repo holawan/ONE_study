@@ -1,28 +1,30 @@
 # onecc-docker
 
-`onecc-docker` supports `one-cmd`, which is currently only supported by ubuntu 18.04, in more OS.
+*onecc-docker* can expand `one-cmds` in more platforms than just Ubuntu 18.04/20.04.
 
 
 
 ## Description
 
 For now, `one-cmds` tools only support Ubuntu 18.04 and 20.04(not officially).
-So people in other environments can't use our tools unless they upgrade the OS (or install Ubuntu OS).
+So, It is difficult for people in different environments to use our tools without using ubuntu18:04.
 
-Therefore, we developed `onecc` that runs using a docker so that users can use `one-cmds` more easily. This is `onecc-docker.`
+To overcome this limitation, we provide _onecc-docker_ that runs using a docker so that users can use `one-cmds` more widely.
 
-> Currently, `onecc-docker` is only supported in Linux environments.
+Currently, `onecc-docker` is only supported in Linux environments.
 
 
 
 ## Requirements
 
-- Linux OS
+- Any Linux distribution
 
 - Docker
 
-    - `onecc-docker` requires the current `user ID` to be included in the `docker group` because it requires the docker-related commands to be executed without `sudo` privileges.
-
+    - Requires root privileges.
+            - `onecc-docker` requires the current `user ID` to be included in the `docker group` because it requires the docker-related commands to be executed without `sudo` privileges.
+                  - See "[Post-installation steps for Linux](https://docs.docker.com/engine/install/linux-postinstall/)"
+        
         ```
         sudo usermod -aG docker ${USER}
         ```
@@ -31,24 +33,26 @@ Therefore, we developed `onecc` that runs using a docker so that users can use `
 
 
 
-## Structure
+## Steps
 
 ### Summary 
 
 `onecc-docker` creates a docker image with the latest release version of `ONE`, runs `onecc` inside the docker container after the container is driven to deliver the desired result to the user.
 
-### To check the latest version of ONE
+1. To check the latest version of ONE
+    - We use GitHub API to get the latest release version of ONE. Create a docker file using the imported version.
 
-- We use github api to get the latest release version of ONE. Create a docker file using the imported version.
 
-### Check Docker Image Presence and Build Image
+2. Check Docker Image Presence and Build Image
 
-- To prevent repetitive image generation, we verify that there is an `onecc` image of the latest `one` release version.
-- If not, build the docker image using the docker file.
+    - To prevent repetitive image generation, we verify that there is an `onecc` image of the latest `one` release version.
 
-### Run Docker Container
+    - If not, build the docker image using the docker file.
 
-- When the above processes are successfully completed, we drive the docker container with the command the user wants. `onecc` runs on the user's current path and returns the result to the command line.
+
+3. Run Docker Container
+    - When the above steps are successfully completed, we drive the docker container with the command the user wants. `onecc` runs on the user's current path and returns the result to the command line.
+
 
 
 
@@ -56,7 +60,7 @@ Therefore, we developed `onecc` that runs using a docker so that users can use `
 
 ### Preparations
 
-We prepare the Tensorflow file, configure file, and workflow for the test.
+Prepare source files like below;
 
 ```
 $ tree

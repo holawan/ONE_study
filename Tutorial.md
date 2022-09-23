@@ -1,65 +1,13 @@
-# onecc-docker
+# Tutorial
 
-`onecc-docker` supports `one-cmd`, which is currently only supported by ubuntu 18.04, in more OS.
-
-
-
-## Description
-
-For now, `one-cmds` tools only support Ubuntu 18.04 and 20.04(not officially).
-So people in other environments can't use our tools unless they upgrade the OS (or install Ubuntu OS).
-
-Therefore, we developed `onecc` that runs using a docker so that users can use `one-cmds` more easily. This is `onecc-docker.`
-
-> Currently, `onecc-docker` is only supported in Linux environments.
-
-
-
-## Requirements
-
-- Linux OS
-
-- Docker
-
-    - `onecc-docker` requires the current `user ID` to be included in the `docker group` because it requires the docker-related commands to be executed without `sudo` privileges.
-
-        ```
-        sudo usermod -aG docker ${USER}
-        ```
-
-- Python 3.8
-
-
-
-## Structure
-
-### Summary 
-
-`onecc-docker` creates a docker image with the latest release version of `ONE`, runs `onecc` inside the docker container after the container is driven to deliver the desired result to the user.
-
-### To check the latest version of ONE
-
-- We use github api to get the latest release version of ONE. Create a docker file using the imported version.
-
-### Check Docker Image Presence and Build Image
-
-- To prevent repetitive image generation, we verify that there is an `onecc` image of the latest `one` release version.
-- If not, build the docker image using the docker file.
-
-### Run Docker Container
-
-- When the above processes are successfully completed, we drive the docker container with the command the user wants. `onecc` runs on the user's current path and returns the result to the command line.
-
-
-
-## Examples
+This document provides a tutorial for running _onecc-docker_.
 
 ### Preparations
 
-We prepare the Tensorflow file, configure file, and workflow for the test.
+Prepare source files like below;
 
 ```
- tree
+$ tree
 .
 ├── Dockerfile
 ├── inception_v3.pb
@@ -231,10 +179,33 @@ $ cat onecc.workflow.json
 ##### run
 
 ```
+$ ./onecc-docker -W onecc.workflow.json
+Estimated count of arithmetic ops: 11.460 G  ops, equivalently 5.730 G  MACs
+model2nnpkg.sh: Generating nnpackage inception_v3.opt in inception_v3_pkg
 ```
 
 ##### tree
 
 ```
+$ tree
+.
+├── Dockerfile
+├── inception_v3.circle
+├── inception_v3.circle.log
+├── inception_v3.opt.circle
+├── inception_v3.opt.circle.log
+├── inception_v3.pb
+├── inception_v3.tflite
+├── inception_v3_pkg
+│   └── inception_v3.opt
+│       ├── inception_v3.opt.circle
+│       └── metadata
+│           └── MANIFEST
+├── inception_v3_pkg.log
+├── onecc-docker
+├── onecc.template.cfg
+└── onecc.workflow.json
+
+3 directories, 13 files
 ```
 
