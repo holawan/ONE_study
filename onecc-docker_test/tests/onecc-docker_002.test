@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Samsung Electronics Co., Ltd. All Rights Reserved
+# Copyright (c) 2021 Samsung Electronics Co., Ltd. All Rights Reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Run onecc-dodcker with workflow file
+# Check if docker image is created
 
 filename_ext="$(basename -- $0)"
 filename="${filename_ext%.*}"
@@ -27,15 +27,11 @@ trap_err_onexit()
 
 trap trap_err_onexit ERR
 
-workflowfile="onecc-docker_002.workflow.json"
-outputfile="inception_v3.alt.circle"
-
-rm -rf ${outputfile}
-
 # run test
-onecc-docker -W ${workflowfile} > ${filename}.log 2>&1
+onecc-docker -v
+RESULT=$(docker images -q onecc 2>&1)
 
-if [[ ! -s "${outputfile}" ]]; then
+if [[ -z "$RESULT" ]]; then
   trap_err_onexit
 fi
 
